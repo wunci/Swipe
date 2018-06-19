@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Swipe 例子</title>
+    <link rel="stylesheet" href="../swipe.css">
+    <style>
+        .slide1{
+            background: #4390EE;
+        }
+        .slide2{
+            background: green;
+        }
+        .slide3{
+            background: #999;
+        }
+        .slide4{
+            background: yellow;
+        }
+        .swipe-slide{
+            text-align: center;
+            height: 200px;
+            line-height: 200px;
+            color: #fff;
+            font-size: 30px
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="swipe-wrap">
+            <div class="swipe-slide slide1">
+                slide1
+            </div>
+            <div class="swipe-slide slide2">
+                slide2
+            </div>
+            <div class="swipe-slide slide3">
+                slide3
+            </div>
+            <div class="swipe-slide slide4">
+                slide4
+            </div>
+        </div>
+        <div class="pagination"></div>
+        <div class="swipe-btn-prev"></div>
+        <div class="swipe-btn-next"></div>
+    </div>
+    <script src="../swipe.js"></script>
+    <script>
+        var swiper = new Swipe('.main',{
+            pagination:{
+                el: '.pagination',
+                clickAble: true
+            },
+            autoplay: 3000,
+            navigation:{
+                next:'.swipe-btn-next',
+                prev:'.swipe-btn-prev',
+            },
+            transitionEnd:function(swipe){
+                console.log('realIndex',swipe.realIndex)
+            },
+        })
+    </script>
+</body>
+</html>
