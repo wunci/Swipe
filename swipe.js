@@ -107,7 +107,7 @@
 
     // 分页按钮点击
     Swipe.prototype.paginationClick = function (i, e) {
-        console.log('i', e, i)
+        if(i + 1 === index) return        
         this.setStyle(-clientWidth * (i + 1), true)
         end = start = -clientWidth * (i + 1);
         index = i + 1;
