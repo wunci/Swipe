@@ -31,7 +31,7 @@
         navigation = options.navigation || null
         transitionEnd = options.transitionEnd || null
         speed = options.speed || 300
-        index = startSlide = options.startSlide || 1; // 初始化开始位置
+        index = startSlide = options.startSlide || 1;// 初始化开始位置
         start = end = startSlide * -clientWidth;
 
         main = document.querySelector(el);
@@ -71,7 +71,7 @@
         window.onresize = window.onload = function () {
             clientWidth = wrap.offsetWidth
             end = -clientWidth
-            index = startSlide = options.startSlide || 1; // 初始化开始位置
+            index = startSlide = options.startSlide || 1;// 初始化开始位置
             start = end = startSlide * -clientWidth;
             scroll = 0
             allImg.forEach(val => {
@@ -103,18 +103,17 @@
                 prevEl.addEventListener('click', that.throttle(that.prev.bind(that)), false)
                 nextEl.addEventListener('click', that.throttle(that.next.bind(that)), false)
             }
-
         }
     }
 
     // 分页按钮点击
     Swipe.prototype.paginationClick = function (i, e) {
         if (i + 1 === index) return
-        this.setStyle(-clientWidth * (i + 1), true)
         end = start = -clientWidth * (i + 1);
         index = i + 1;
-        this.realIndex = i - 1
         this.setPagination()
+        this.setStyle(-clientWidth * (i + 1), true)
+        this.setTransitionEnd()
     }
     Swipe.prototype.prev = function () {
         var that = this
@@ -128,7 +127,6 @@
             that.setStyle(-clientWidth * index, true, function () {
                 wrap.addEventListener('transitionEnd', prevFn, false)
                 wrap.addEventListener('webkitTransitionEnd', prevFn, false)
-
                 function prevFn() {
                     if (index === 0) {
                         index = totalLength - 2
@@ -141,8 +139,10 @@
             that.setStyle(-clientWidth * index, true)
         }
         start = end = -clientWidth * index
+        this.setTransitionEnd()
     }
-    Swipe.prototype.next = function () {
+    Swipe.prototype.next = function (e) {
+        e.preventDefault()
         var that = this
         clearInterval(autoTimer)
         if (autoTimer) {
@@ -167,6 +167,7 @@
             that.setStyle(-clientWidth * index, true)
         }
         start = end = -clientWidth * index
+        this.setTransitionEnd()
     }
     // 执行动画
     Swipe.prototype.setStyle = function (scroll, isMove, cb) {
@@ -180,6 +181,18 @@
             wrap.style.transitionDuration = '0ms';
             wrap.style.webkitTransitionDuration = '0ms';
         }
+        // realIndex设置
+        if (index === 0) {
+            this.realIndex = totalLength - 3
+        } else {
+            this.realIndex = index - 1
+        }
+        if (index === 5) {
+            this.realIndex = 0
+        } else {
+            this.realIndex = index - 1
+        }
+            
     }
     // 鼠标/手指按下
     Swipe.prototype.mousedown = function (e) {
@@ -211,6 +224,8 @@
     }
     // 鼠标/手指移动
     Swipe.prototype.mousemove = function (e) {
+        var targrtClsName = e.target.className
+        if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
         clearInterval(autoTimer)
         if (autoTimer) {
             this.autoSlide()
@@ -223,6 +238,8 @@
     }
     // 鼠标/手指抬起
     Swipe.prototype.mouseup = function (e) {
+        var targrtClsName = e.target.className
+        if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
         clearInterval(autoTimer)
         if (autoTimer) {
             this.autoSlide()
@@ -239,11 +256,7 @@
             if (Math.abs(turnLR) > 50) {
                 index++
                 // 设置当前真正的index
-                if (index === 5) {
-                    this.realIndex = 0
-                } else {
-                    this.realIndex = index - 1
-                }
+                
                 this.setStyle(-clientWidth * index, true)
             } else {
                 this.setStyle(-clientWidth * index, true)
@@ -252,29 +265,30 @@
         } else if (turnLR > 0) {
             if (Math.abs(turnLR) > 50) {
                 index--
-                if (index === 0) {
-                    this.realIndex = totalLength - 3
-                } else {
-                    this.realIndex = index - 1
-                }
+                
                 this.setStyle(-clientWidth * index, true)
             } else {
                 this.setStyle(-clientWidth * index, true)
             }
             end = -clientWidth * index
         }
+        
         if (pagination) {
             this.setPagination()
         }
 
-        // 监听滚动结束
-        this.transitionEnd = this.transitionEnd.bind(this)
-        wrap.addEventListener('transitionEnd', this.transitionEnd, false)
-        wrap.addEventListener('webkitTransitionEnd', this.transitionEnd, false)
+        this.setTransitionEnd()
 
         // 移除滑动和抬起时间
         document.removeEventListener('mousemove', this.mousemove, false)
         document.removeEventListener('mouseup', this.mouseup, false)
+    }
+    Swipe.prototype.setTransitionEnd = function () {
+        // 监听滚动结束
+        this.transitionEnd = this.transitionEnd.bind(this)
+        wrap.addEventListener('transitionEnd', this.transitionEnd, false)
+        wrap.addEventListener('webkitTransitionEnd', this.transitionEnd, false)
+        
     }
     // 运动结束
     Swipe.prototype.transitionEnd = function () {
@@ -330,4 +344,3 @@
     }
     window.Swipe = Swipe
 })(window)
-   
