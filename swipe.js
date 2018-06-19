@@ -142,7 +142,6 @@
         this.setTransitionEnd()
     }
     Swipe.prototype.next = function (e) {
-        e.preventDefault()
         var that = this
         clearInterval(autoTimer)
         if (autoTimer) {
