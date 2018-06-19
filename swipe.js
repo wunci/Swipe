@@ -1,10 +1,5 @@
-/**
- * Swiper 0.0.2
- * https://github.com/wclimb/Swipe
- * Copyright 2018 wclimb
- * Released under the MIT License
- */
 (function (window) {
+    'use strict';
     var pagination, // 分页
         autoplay, // 自动轮播
         navigation, // 前进后退
@@ -14,18 +9,24 @@
         start = 0, // 开始
         scroll = 0, // 滚动的距离，累加
         end = -clientWidth, // 初始化结束位置
-        index = 1; // 下标
+        index = 1, // 下标
         turnLR = 0, // 滑动的距离
         allImg = null, // 全部图片集合
         autoTimer = null, // 自动轮播定时器
         totalLength = 0, // 图片总的length
-        transitionEnd = null; // 运动结束执行函数
+        transitionEnd = null, // 运动结束执行函数
+        speed = 300, // 过渡时间
+        startSlide = 1;
 
     var Swipe = function (el, options) {
         pagination = options.pagination || ''
         autoplay = options.autoplay || ''
         navigation = options.navigation || null
         transitionEnd = options.transitionEnd || null
+        speed = options.speed || 300
+        index = startSlide = options.startSlide || 1; // 初始化开始位置
+        start = end = startSlide * -clientWidth;
+
         main = document.querySelector(el);
         allImg = wrap.querySelectorAll('.swipe-slide')
         var firstELe = allImg[0].cloneNode(true); // 克隆第一个元素
@@ -43,7 +44,7 @@
             var paginationEl = document.querySelector(pagination.el);
             for (var i = 0; i < totalLength - 2; i++) {
                 var ele = document.createElement('div');
-                if (i == 0) {
+                if (i == index - 1) {
                     ele.className = 'swipe-pagination-list swipe-pagination-active'
                 } else {
                     ele.className = 'swipe-pagination-list '
@@ -63,7 +64,8 @@
         window.onresize = window.onload = function () {
             clientWidth = wrap.offsetWidth
             end = -clientWidth
-            start = end
+            index = startSlide = options.startSlide || 1; // 初始化开始位置
+            start = end = startSlide * -clientWidth;
             scroll = 0
             allImg.forEach(val => {
                 val.style.width = clientWidth + 'px'
@@ -119,6 +121,7 @@
             that.setStyle(-clientWidth * index, true, function () {
                 wrap.addEventListener('transitionEnd', prevFn, false)
                 wrap.addEventListener('webkitTransitionEnd', prevFn, false)
+
                 function prevFn() {
                     if (index === 0) {
                         index = totalLength - 2
@@ -145,6 +148,7 @@
             that.setStyle(-clientWidth * index, true, function () {
                 wrap.addEventListener('transitionEnd', nextFn, false)
                 wrap.addEventListener('webkitTransitionEnd', nextFn, false)
+
                 function nextFn() {
                     if (index === totalLength - 1) {
                         index = 1
@@ -163,8 +167,8 @@
         wrap.style.transform = 'translate3d(' + scroll + 'px,0,0)';
         wrap.style.webkitTransform = 'translate3d(' + scroll + 'px,0,0)';
         if (isMove) {
-            wrap.style.transitionDuration = '300ms';
-            wrap.style.webkitTransitionDuration = '300ms';
+            wrap.style.transitionDuration = speed + 'ms';
+            wrap.style.webkitTransitionDuration = speed + 'ms';
             cb && cb()
         } else {
             wrap.style.transitionDuration = '0ms';
@@ -292,8 +296,8 @@
     }
     // 节流
     Swipe.prototype.throttle = function (fn, interval) {
-        var timer
-        isFirst = true;
+        var timer,
+            isFirst = true;
         return function () {
             var args = arguments,
                 that = this
@@ -308,7 +312,7 @@
                 clearTimeout(timer)
                 timer = null
                 fn.apply(that, args)
-            }, interval || 300);
+            }, interval || speed);
         }
     }
     // 自动轮播
@@ -320,4 +324,3 @@
     }
     window.Swipe = Swipe
 })(window)
-   

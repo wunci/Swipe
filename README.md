@@ -37,6 +37,8 @@ html
 js
 ```js
 var swiper = new Swipe('.main',{
+        startSlide: 1, // 开始位置从1开始
+        speed: 500, // 过渡时间
         pagination:{
             el: '.pagination',// 分页元素
             clickAble: true // 分页可点击
