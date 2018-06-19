@@ -1,157 +1,168 @@
 (function (window) {
+    var pagination, // 分页
+        autoplay, // 自动轮播
+        navigation, // 前进后退
+        main, // 主要区域
+        wrap = document.querySelector('.wrap'),
+        clientWidth = wrap.offsetWidth,
+        start = 0, // 开始
+        scroll = 0, // 滚动的距离，累加
+        end = -clientWidth, // 初始化结束位置
+        index = 1; // 下标
+    turnLR = 0, // 滑动的距离
+        allImg = null, // 全部图片集合
+        autoTimer = null, // 自动轮播定时器
+        totalLength = 0, // 图片总的length
+        transitionEnd = null; // 运动结束执行函数
+
     var Swipe = function (el, options) {
-        this.pagination = options.pagination || ''
-        this.autoplay = options.autoplay || ''
-        this.navigation = options.navigation || null
-        console.log(this.pagination)
-        this.main = document.querySelector(el);
-        this.wrap = document.querySelector('.wrap');
-        this.clientWidth = this.wrap.offsetWidth; //可视区域宽度
-        this.start = 0; //开始位置
-        this.scroll = 0; //滑动的总距离
-        this.end = -this.clientWidth; //结束位置
-        this.index = 1; //下标
-        this.turnLR = 0; //滑动的距离
-        this.allImg = this.wrap.querySelectorAll('img');
-        this.firstELe = this.allImg[0].cloneNode();
-        this.lastELe = this.allImg[this.allImg.length - 1].cloneNode();
-        this.autoTimer = null;
+        pagination = options.pagination || ''
+        autoplay = options.autoplay || ''
+        navigation = options.navigation || null
+        transitionEnd = options.transitionEnd || null
+        main = document.querySelector(el);
+        allImg = wrap.querySelectorAll('img')
+        var lastELe = allImg[allImg.length - 1].cloneNode(); // 克隆最后一个元素
+        var firstELe = allImg[0].cloneNode(); // 克隆第一个元素
+        wrap.appendChild(firstELe);
+        wrap.insertBefore(lastELe, allImg[0]);
 
-        this.wrap.appendChild(this.firstELe);
-        this.wrap.insertBefore(this.lastELe, this.allImg[0]);
-        this.totalLength = this.wrap.querySelectorAll('img').length
+        totalLength = wrap.querySelectorAll('img').length;
 
-        if (this.autoplay) {
+        if (autoplay) {
             this.autoSlide()
         }
 
         // 分页
-        if (this.pagination) {
-            pagination = document.querySelector(this.pagination);
-            for (var i = 0; i < this.totalLength - 2; i++) {
+        console.log(totalLength)
+        if (pagination) {
+            pagination = document.querySelector(pagination);
+            for (var i = 0; i < totalLength - 2; i++) {
                 var ele = document.createElement('div');
                 if (i == 0) {
                     ele.className = 'p-list active'
                 } else {
                     ele.className = 'p-list '
                 }
-                console.log(ele)
+                // console.log(ele)
                 pagination.appendChild(ele)
-
             }
         }
         var that = this
         window.onresize = window.onload = function () {
-            that.clientWidth = that.wrap.offsetWidth
-            that.end = -that.clientWidth
-            that.start = that.end
-            that.scroll = 0
+            clientWidth = wrap.offsetWidth
+            end = -clientWidth
+            start = end
+            scroll = 0
             // console.log(clientWidth,end)
-            that.allImg.forEach(val => {
-                val.style.width = that.clientWidth + 'px'
+            allImg.forEach(val => {
+                val.style.width = clientWidth + 'px'
             })
-            that.setStyle(that.end, false)
+            that.setStyle(end, false)
         }
-        this.setStyle(this.end, false)
+        this.setStyle(end, false)
+
         if ('ontouchstart' in window) {
-            this.main.addEventListener('touchstart', this.mousedown.bind(this), false)
-            this.main.addEventListener('touchmove', this.mousemove.bind(this), false)
-            this.main.addEventListener('touchend', this.mouseup.bind(this), false)
+            main.addEventListener('touchstart', that.mousedown.bind(that), false)
+            main.addEventListener('touchmove', that.mousemove.bind(that), false)
+            main.addEventListener('touchend', that.mouseup.bind(that), false)
         } else {
-            console.log('mouse')
-            that.main.addEventListener('mousedown', that.mousedown.bind(that), false)
+            main.addEventListener('mousedown', that.mousedown.bind(that), false)
         }
 
+        // 前进后退
+        if (!navigation) return
+        var next = navigation.next
+        var prev = navigation.prev
         // 后退
-        if (!this.navigation) return
-        var next = this.navigation.next
-        var prev = this.navigation.prev
         document.querySelector(prev).onclick = that.throttle(that.prev.bind(that))
-
         // 前进
         document.querySelector(next).onclick = that.throttle(that.next.bind(that))
     }
     Swipe.prototype.prev = function () {
         var that = this
 
-        clearInterval(that.autoTimer)
-        console.log(that.autoTimer)
-        if (that.autoTimer) {
+        clearInterval(autoTimer)
+        console.log(autoTimer)
+        if (autoTimer) {
             console.log('1231')
             that.autoSlide()
         }
-        that.index--
+        index--
 
-            that.setPagination()
-        if (that.index === 0) {
-            that.setStyle(-that.clientWidth * that.index, true, function () {
+        that.setPagination()
+        if (index === 0) {
+            that.setStyle(-clientWidth * index, true, function () {
                 setTimeout(function () {
-                    that.index = that.totalLength - 2
-                    that.setStyle(-that.clientWidth * that.index, false)
+                    index = totalLength - 2
+                    that.setStyle(-clientWidth * index, false)
                 }, 300);
             })
         } else {
-            that.setStyle(-that.clientWidth * that.index, true)
+            that.setStyle(-clientWidth * index, true)
         }
 
-        that.start = that.end = -that.clientWidth * that.index
+        start = end = -clientWidth * index
     }
     Swipe.prototype.next = function () {
         var that = this
-        clearInterval(that.autoTimer)
-        console.log(that.autoTimer)
-        if (that.autoTimer) {
+        clearInterval(autoTimer)
+        console.log(autoTimer)
+        if (autoTimer) {
             console.log('1231')
             that.autoSlide()
         }
-        that.index++
+        index++
         that.setPagination()
 
-        if (that.index === that.totalLength - 1) {
-            that.setStyle(-that.clientWidth * that.index, true, function () {
+        if (index === totalLength - 1) {
+            that.setStyle(-clientWidth * index, true, function () {
                 setTimeout(function () {
-                    that.index = 1
-                    that.setStyle(-that.clientWidth * that.index, false)
+                    index = 1
+                    that.setStyle(-clientWidth * index, false)
                 }, 300);
             })
 
         } else {
-            that.setStyle(-that.clientWidth * that.index, true)
+            that.setStyle(-clientWidth * index, true)
         }
 
-        that.start = that.end = -that.clientWidth * that.index
+        start = end = -clientWidth * index
     }
+    // 执行动画
     Swipe.prototype.setStyle = function (scroll, isMove, cb) {
-        this.wrap.style.transform = 'translate3d(' + scroll + 'px,0,0)';
-        this.wrap.style.webkitTransform = 'translate3d(' + scroll + 'px,0,0)';
+        wrap.style.transform = 'translate3d(' + scroll + 'px,0,0)';
+        wrap.style.webkitTransform = 'translate3d(' + scroll + 'px,0,0)';
         console.log(isMove)
         if (isMove) {
-            this.wrap.style.transitionDuration = '300ms';
-            this.wrap.style.webkitTransitionDuration = '300ms';
+            wrap.style.transitionDuration = '300ms';
+            wrap.style.webkitTransitionDuration = '300ms';
             cb && cb()
         } else {
-            this.wrap.style.transitionDuration = '0ms';
-            this.wrap.style.webkitTransitionDuration = '0ms';
+            wrap.style.transitionDuration = '0ms';
+            wrap.style.webkitTransitionDuration = '0ms';
         }
     }
+    // 鼠标/手指按下
     Swipe.prototype.mousedown = function (e) {
-        clearInterval(this.autoTimer)
+        clearInterval(autoTimer)
         // console.log(autoTimer)
         console.log(this)
-        if (this.autoTimer) {
+        if (autoTimer) {
             this.autoSlide()
         }
         e.preventDefault()
-        this.start = e.offsetX ? e.offsetX : e.touches[0].pageX;
-        if (this.index === 0) {
-            this.index = this.totalLength - 2;
-            this.end = -this.clientWidth * this.index
-            this.setStyle(-this.clientWidth * this.index, false)
+        // alert()
+        start = e.offsetX ? e.offsetX : e.touches[0].pageX;
+        if (index === 0) {
+            index = totalLength - 2;
+            end = -clientWidth * index
+            this.setStyle(-clientWidth * index, false)
         }
-        if (this.index === this.totalLength - 1) {
-            this.index = 1
-            this.end = -this.clientWidth * this.index
-            this.setStyle(-this.clientWidth * this.index, false)
+        if (index === totalLength - 1) {
+            index = 1
+            end = -clientWidth * index
+            this.setStyle(-clientWidth * index, false)
         }
         var that = this
         if ('onmousemove' in window) {
@@ -161,69 +172,103 @@
             document.addEventListener('mouseup', that.mouseup, false)
         }
     }
+    // 鼠标/手指移动
     Swipe.prototype.mousemove = function (e) {
-        clearInterval(this.autoTimer)
+        clearInterval(autoTimer)
         // console.log(autoTimer)
-        if (this.autoTimer) {
+        if (autoTimer) {
             console.log('1231')
             this.autoSlide()
         }
         e.preventDefault()
+        document.querySelector('#div1').innerHTML = start
+
         var offsetX = e.offsetX ? e.offsetX : e.touches[0].pageX;
-        this.scroll = (offsetX - this.start + this.end)
-        this.turnLR = offsetX - this.start
-        console.log('move', this.scroll, this.turnLR)
-        this.setStyle(this.scroll, true)
+        scroll = (offsetX - start + end)
+        turnLR = offsetX - start
+        // console.log('move',scroll,turnLR)
+        this.setStyle(scroll, true)
     }
+    // 鼠标/手指抬起
     Swipe.prototype.mouseup = function (e) {
-        clearInterval(this.autoTimer)
-        console.log(this.autoTimer)
-        if (this.autoTimer) {
+        clearInterval(autoTimer)
+        console.log(autoTimer)
+        if (autoTimer) {
             this.autoSlide()
         }
         e.preventDefault()
         var offsetX = e.offsetX ? e.offsetX : e.changedTouches[0].pageX;
-        console.log('turnLR', this.turnLR, this.scroll, this.start, this.end, offsetX)
-        if (this.start === offsetX) {
+        // console.log('turnLR',turnLR,scroll,start,end,offsetX)
+        if (start === offsetX) {
             return
         }
-        if (this.turnLR < 0) {
+        if (turnLR < 0) {
             console.log('向右')
-            if (Math.abs(this.turnLR) > 120) {
-                this.index++
-                    this.setStyle(-this.clientWidth * (this.index), true)
+            if (Math.abs(turnLR) > 120) {
+
+                index++
+
+                // 设置当前真正的index
+                if (index === 5) {
+                    this.realIndex = 0
+                } else {
+                    this.realIndex = index - 1
+                }
+                console.log('realIndex', this.realIndex)
+                this.setStyle(-clientWidth * index, true)
             } else {
-                this.setStyle(-this.clientWidth * (this.index), true)
+                this.setStyle(-clientWidth * index, true)
             }
-            this.end = -this.clientWidth * this.index
-        } else if (this.turnLR > 0) {
+            end = -clientWidth * index
+        } else if (turnLR > 0) {
             console.log('向左')
-            if (Math.abs(this.turnLR) > 120) {
-                this.index--
-                    this.setStyle(-this.clientWidth * (this.index), true)
+            if (Math.abs(turnLR) > 120) {
+
+                index--
+
+                if (index === 0) {
+                    this.realIndex = totalLength - 3
+                } else {
+                    this.realIndex = index - 1
+                }
+                console.log('realIndex', this.realIndex)
+                this.setStyle(-clientWidth * index, true)
             } else {
-                this.setStyle(-this.clientWidth * (this.index), true)
+                this.setStyle(-clientWidth * index, true)
             }
-            this.end = -this.clientWidth * this.index
+            end = -clientWidth * index
         }
-        console.log(this)
-        if (this.pagination) {
+        if (pagination) {
             this.setPagination()
         }
 
+        // 监听滚动结束
+        this.transitionEnd = this.transitionEnd.bind(this)
+        wrap.addEventListener('transitionEnd', this.transitionEnd, false)
+        wrap.addEventListener('webkitTransitionEnd', this.transitionEnd, false)
+
+        // 移除滑动和抬起时间
         document.removeEventListener('mousemove', this.mousemove, false)
         document.removeEventListener('mouseup', this.mouseup, false)
     }
+    // 运动结束
+    Swipe.prototype.transitionEnd = function () {
+        if (transitionEnd) {
+            typeof transitionEnd === 'function' && transitionEnd(this);
+            wrap.removeEventListener('transitionEnd', this.transitionEnd, false)
+            wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
+        }
+    }
     // 设置分页
     Swipe.prototype.setPagination = function () {
-        if (!this.pagination) return
-        console.log('index', this.index)
-        var num = this.index
-        if (num === this.totalLength - 1) {
+        if (!pagination) return
+        console.log('index', index)
+        var num = index
+        if (num === totalLength - 1) {
             num = 1
         }
         if (num === 0) {
-            num = this.totalLength - 2
+            num = totalLength - 2
         }
         var list = document.querySelectorAll('.p-list');
         list.forEach(function (val, i) {
@@ -255,7 +300,7 @@
     // 自动轮播
     Swipe.prototype.autoSlide = function () {
         var that = this
-        this.autoTimer = setInterval(function () {
+        autoTimer = setInterval(function () {
             that.next()
         }, this.autoplay)
     }
