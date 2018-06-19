@@ -1,3 +1,10 @@
+/**
+ * Swiper 0.0.4
+ * https://github.com/wclimb/Swipe
+ * Copyright 2018 wclimb
+ * Released under the MIT License
+ * 2018-06-19
+ */
 (function (window) {
     'use strict';
     var pagination, // 分页
@@ -148,7 +155,6 @@
             that.setStyle(-clientWidth * index, true, function () {
                 wrap.addEventListener('transitionEnd', nextFn, false)
                 wrap.addEventListener('webkitTransitionEnd', nextFn, false)
-
                 function nextFn() {
                     if (index === totalLength - 1) {
                         index = 1
@@ -324,3 +330,4 @@
     }
     window.Swipe = Swipe
 })(window)
+   
