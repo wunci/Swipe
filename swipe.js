@@ -68,8 +68,7 @@
                 paginationEl.appendChild(ele)
             }
         }
-        window.onresize = window.onload = function () {
-            console.log('resize')
+        window.onresize = window.onload = this.throttle(function () {
             clientWidth = wrap.offsetWidth
             end = -clientWidth
             index = startSlide = options.startSlide || 1; // 初始化开始位置
@@ -81,7 +80,8 @@
                 val.style.width = clientWidth + 'px'
             })
             that.setStyle(end, false)
-        }
+        })
+
         this.setStyle(end, false)
 
         if ('ontouchstart' in window) {
@@ -91,7 +91,14 @@
         } else {
             main.addEventListener('mousedown', that.mousedown.bind(that), false)
         }
-
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState == 'visible') {
+                clearTimeout(autoTimer)
+                that.autoSlide()
+            }else{
+                clearTimeout(autoTimer)
+            }
+        })
         // 前进后退
         if (!navigation) return
         var next = navigation.next,
@@ -112,7 +119,7 @@
     // 分页按钮点击
     Swipe.prototype.paginationClick = function (i, e) {
         if (i + 1 === index) return
-        clearInterval(autoTimer)
+        clearTimeout(autoTimer)
         if (autoTimer) {
             this.autoSlide()
         }
@@ -120,11 +127,13 @@
         index = i + 1;
         this.setPagination()
         this.setStyle(-clientWidth * (i + 1), true)
+        wrap.removeEventListener('transitionend', this.transitionEnd, false)
+        wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
         this.setTransitionEnd()
     }
     Swipe.prototype.prev = function () {
         var that = this
-        clearInterval(autoTimer)
+        clearTimeout(autoTimer)
         if (autoTimer) {
             that.autoSlide()
         }
@@ -136,11 +145,13 @@
             that.setStyle(-clientWidth * index, true)
         }
         start = end = -clientWidth * index
+        wrap.removeEventListener('transitionend', this.transitionEnd, false)
+        wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
         this.setTransitionEnd()
     }
     Swipe.prototype.next = function (e) {
         var that = this
-        clearInterval(autoTimer)
+        clearTimeout(autoTimer)
         if (autoTimer) {
             that.autoSlide()
         }
@@ -152,7 +163,9 @@
         } else {
             that.setStyle(-clientWidth * index, true)
         }
-        start = end = -clientWidth * index
+        start = end = -clientWidth * index;
+        wrap.removeEventListener('transitionend', this.transitionEnd, false)
+        wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
         this.setTransitionEnd()
     }
     // 执行动画
@@ -182,9 +195,9 @@
     }
     // 鼠标/手指按下
     Swipe.prototype.mousedown = function (e) {
-        clearInterval(autoTimer)
         var targrtClsName = e.target.className
         if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
+        clearTimeout(autoTimer)
         if (autoTimer) {
             this.autoSlide()
         }
@@ -213,7 +226,7 @@
         e.preventDefault()
         var targrtClsName = e.target.className
         if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
-        clearInterval(autoTimer)
+        clearTimeout(autoTimer)
         if (autoTimer) {
             this.autoSlide()
         }
@@ -227,7 +240,7 @@
         e.preventDefault()
         var targrtClsName = e.target.className
         if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
-        clearInterval(autoTimer)
+        clearTimeout(autoTimer)
         if (autoTimer) {
             this.autoSlide()
         }
@@ -259,7 +272,8 @@
         if (pagination) {
             this.setPagination()
         }
-
+        wrap.removeEventListener('transitionend', this.transitionEnd, false)
+        wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
         this.setTransitionEnd()
 
         // 移除滑动和抬起时间
@@ -269,7 +283,7 @@
     Swipe.prototype.setTransitionEnd = function () {
         // 监听滚动结束
         this.transitionEnd = this.transitionEnd.bind(this)
-        wrap.addEventListener('transitionEnd', this.transitionEnd, false)
+        wrap.addEventListener('transitionend', this.transitionEnd, false)
         wrap.addEventListener('webkitTransitionEnd', this.transitionEnd, false)
 
     }
@@ -300,7 +314,7 @@
         if (transitionEnd) {
             typeof transitionEnd === 'function' && transitionEnd(this);
         }
-        wrap.removeEventListener('transitionEnd', this.transitionEnd, false)
+        wrap.removeEventListener('transitionend', this.transitionEnd, false)
         wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
     }
     // 设置分页
@@ -318,7 +332,6 @@
         list.forEach(function (val, i) {
             var cls = val.className
             val.className = cls.replace('swipe-pagination-active', '').replace(/^\s+|\s+$/g, '')
-           
         })
         var cls = list[num - 1].className;
         var clsArr = cls.split(/\s+/)
@@ -348,9 +361,9 @@
         }
     }
     // 自动轮播
-    Swipe.prototype.autoSlide = function () {
+    Swipe.prototype.autoSlide = function() {
         var that = this
-        autoTimer = setInterval(function () {
+        autoTimer = setTimeout(function () {
             that.next()
         }, autoplay)
     }
