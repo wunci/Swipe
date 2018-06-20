@@ -7,6 +7,10 @@
     <title>Swipe 例子</title>
     <link rel="stylesheet" href="../swipe.css">
     <style>
+        .main{
+            margin: 30px auto 0;
+            width: 50%
+        }
         .slide1{
             background: #4390EE;
         }
@@ -24,7 +28,13 @@
             height: 200px;
             line-height: 200px;
             color: #fff;
-            font-size: 30px
+            font-size: 30px;
+        }
+        @media (max-width:900px){
+            .main{
+                margin-top: 0;
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -57,7 +67,7 @@
                 el: '.pagination',
                 clickAble: true
             },
-            autoplay: 3000,
+            // autoplay: 3000,
             navigation:{
                 next:'.swipe-btn-next',
                 prev:'.swipe-btn-prev',

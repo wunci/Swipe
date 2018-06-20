@@ -1,9 +1,9 @@
 /**
- * Swiper 0.0.4
+ * Swiper 0.0.5
  * https://github.com/wclimb/Swipe
  * Copyright 2018 wclimb
  * Released under the MIT License
- * 2018-06-19
+ * 2018-06-20
  */
 (function (window) {
     'use strict';
@@ -31,7 +31,7 @@
         navigation = options.navigation || null
         transitionEnd = options.transitionEnd || null
         speed = options.speed || 300
-        index = startSlide = options.startSlide || 1;// 初始化开始位置
+        index = startSlide = options.startSlide || 1; // 初始化开始位置
         start = end = startSlide * -clientWidth;
 
         main = document.querySelector(el);
@@ -69,12 +69,15 @@
             }
         }
         window.onresize = window.onload = function () {
+            console.log('resize')
             clientWidth = wrap.offsetWidth
             end = -clientWidth
-            index = startSlide = options.startSlide || 1;// 初始化开始位置
+            index = startSlide = options.startSlide || 1; // 初始化开始位置
             start = end = startSlide * -clientWidth;
-            scroll = 0
-            allImg.forEach(val => {
+            scroll = 0;
+            var nowAllImg = wrap.querySelectorAll('.swipe-slide');
+            nowAllImg.forEach(function(val,i){
+                val.setAttribute('data-index',i);
                 val.style.width = clientWidth + 'px'
             })
             that.setStyle(end, false)
@@ -109,6 +112,10 @@
     // 分页按钮点击
     Swipe.prototype.paginationClick = function (i, e) {
         if (i + 1 === index) return
+        clearInterval(autoTimer)
+        if (autoTimer) {
+            this.autoSlide()
+        }
         end = start = -clientWidth * (i + 1);
         index = i + 1;
         this.setPagination()
@@ -124,17 +131,7 @@
         index--
         that.setPagination()
         if (index === 0) {
-            that.setStyle(-clientWidth * index, true, function () {
-                wrap.addEventListener('transitionEnd', prevFn, false)
-                wrap.addEventListener('webkitTransitionEnd', prevFn, false)
-                function prevFn() {
-                    if (index === 0) {
-                        index = totalLength - 2
-                        end = -clientWidth * index
-                        that.setStyle(-clientWidth * index, false)
-                    }
-                }
-            })
+            that.setStyle(-clientWidth * index, true)
         } else {
             that.setStyle(-clientWidth * index, true)
         }
@@ -151,17 +148,7 @@
         that.setPagination()
 
         if (index === totalLength - 1) {
-            that.setStyle(-clientWidth * index, true, function () {
-                wrap.addEventListener('transitionEnd', nextFn, false)
-                wrap.addEventListener('webkitTransitionEnd', nextFn, false)
-                function nextFn() {
-                    if (index === totalLength - 1) {
-                        index = 1
-                        end = -clientWidth * index
-                        that.setStyle(-clientWidth * index, false)
-                    }
-                }
-            })
+            that.setStyle(-clientWidth * index, true)
         } else {
             that.setStyle(-clientWidth * index, true)
         }
@@ -191,7 +178,7 @@
         } else {
             this.realIndex = index - 1
         }
-            
+
     }
     // 鼠标/手指按下
     Swipe.prototype.mousedown = function (e) {
@@ -223,13 +210,13 @@
     }
     // 鼠标/手指移动
     Swipe.prototype.mousemove = function (e) {
+        e.preventDefault()
         var targrtClsName = e.target.className
         if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
         clearInterval(autoTimer)
         if (autoTimer) {
             this.autoSlide()
         }
-        e.preventDefault()
         var offsetX = e.offsetX ? e.offsetX : e.touches[0].pageX;
         scroll = (offsetX - start + end)
         turnLR = offsetX - start
@@ -237,13 +224,13 @@
     }
     // 鼠标/手指抬起
     Swipe.prototype.mouseup = function (e) {
+        e.preventDefault()
         var targrtClsName = e.target.className
         if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
         clearInterval(autoTimer)
         if (autoTimer) {
             this.autoSlide()
         }
-        e.preventDefault()
         var offsetX = e.offsetX ? e.offsetX : e.changedTouches[0].pageX;
         if (start === offsetX) {
             // 移除滑动和抬起时间
@@ -254,8 +241,6 @@
         if (turnLR < 0) {
             if (Math.abs(turnLR) > 50) {
                 index++
-                // 设置当前真正的index
-                
                 this.setStyle(-clientWidth * index, true)
             } else {
                 this.setStyle(-clientWidth * index, true)
@@ -264,14 +249,13 @@
         } else if (turnLR > 0) {
             if (Math.abs(turnLR) > 50) {
                 index--
-                
                 this.setStyle(-clientWidth * index, true)
             } else {
                 this.setStyle(-clientWidth * index, true)
             }
             end = -clientWidth * index
         }
-        
+
         if (pagination) {
             this.setPagination()
         }
@@ -287,15 +271,37 @@
         this.transitionEnd = this.transitionEnd.bind(this)
         wrap.addEventListener('transitionEnd', this.transitionEnd, false)
         wrap.addEventListener('webkitTransitionEnd', this.transitionEnd, false)
-        
+
     }
     // 运动结束
     Swipe.prototype.transitionEnd = function () {
+        if (index === 0) {
+            index = totalLength - 2
+            end = -clientWidth * index
+            this.setStyle(-clientWidth * index, false)
+        }
+        if (index === totalLength - 1) {
+            index = 1
+            end = -clientWidth * index
+            this.setStyle(-clientWidth * index, false)
+        }
+        var nowAllImg = wrap.querySelectorAll('.swipe-slide');
+        nowAllImg.forEach(function(val,i) {
+            var cls = val.className
+            if (cls.indexOf('swipe-slide-active') >= 0){
+                val.className = cls.replace('swipe-slide-active', '').replace(/^\s+|\s+$/g,'')
+            }
+            if(i === index){
+                var clsArr = cls.split(/\s+/)
+                clsArr.push('swipe-slide-active')
+                val.className = clsArr.join(' ')
+            }
+        })
         if (transitionEnd) {
             typeof transitionEnd === 'function' && transitionEnd(this);
-            wrap.removeEventListener('transitionEnd', this.transitionEnd, false)
-            wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
         }
+        wrap.removeEventListener('transitionEnd', this.transitionEnd, false)
+        wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
     }
     // 设置分页
     Swipe.prototype.setPagination = function () {
@@ -307,11 +313,18 @@
         if (num === 0) {
             num = totalLength - 2
         }
+        
         var list = document.querySelectorAll('.swipe-pagination-list');
         list.forEach(function (val, i) {
-            val.className = val.className.replace('swipe-pagination-active', '')
+            var cls = val.className
+            val.className = cls.replace('swipe-pagination-active', '').replace(/^\s+|\s+$/g, '')
+           
         })
-        list[num - 1].className += ' swipe-pagination-active'
+        var cls = list[num - 1].className;
+        var clsArr = cls.split(/\s+/)
+        clsArr.push('swipe-pagination-active')
+        list[num - 1].className = clsArr.join(' ')
+
     }
     // 节流
     Swipe.prototype.throttle = function (fn, interval) {
