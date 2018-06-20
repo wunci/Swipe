@@ -1,6 +1,8 @@
 # Swipe
 Swiper is touch slider
 
+[在线预览](http://www.wclimb.site/swipe/)
+
 暂时可配置列表（可扩展实现常见的大部分功能）
 1. 分页
 2. 分页是否可点击
