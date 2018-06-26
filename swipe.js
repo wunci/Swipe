@@ -1,9 +1,9 @@
 /**
- * Swiper 0.0.5
+ * Swiper 0.1.0
  * https://github.com/wclimb/Swipe
  * Copyright 2018 wclimb
  * Released under the MIT License
- * 2018-06-20
+ * 2018-06-26
  */
 (function (window) {
     'use strict';
@@ -156,13 +156,12 @@
             that.autoSlide()
         }
         index++
-        that.setPagination()
-
         if (index === totalLength - 1) {
             that.setStyle(-clientWidth * index, true)
         } else {
             that.setStyle(-clientWidth * index, true)
         }
+        that.setPagination()
         start = end = -clientWidth * index;
         wrap.removeEventListener('transitionend', this.transitionEnd, false)
         wrap.removeEventListener('webkitTransitionEnd', this.transitionEnd, false)
@@ -196,12 +195,10 @@
     // 鼠标/手指按下
     Swipe.prototype.mousedown = function (e) {
         var targrtClsName = e.target.className
-        if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
+        if (targrtClsName.indexOf('swipe-btn-next') >= 0 || targrtClsName.indexOf('swipe-btn-prev') >= 0 ) return
         clearTimeout(autoTimer)
-        if (autoTimer) {
-            this.autoSlide()
-        }
         e.preventDefault()
+        // 按下的开始位置
         start = e.offsetX ? e.offsetX : e.touches[0].pageX;
         if (index === 0) {
             index = totalLength - 2;
@@ -213,33 +210,30 @@
             end = -clientWidth * index
             this.setStyle(-clientWidth * index, false)
         }
-        var that = this
         if ('onmousemove' in window) {
-            that.mousemove = that.mousemove.bind(that)
-            that.mouseup = that.mouseup.bind(that)
-            document.addEventListener('mousemove', that.mousemove, false)
-            document.addEventListener('mouseup', that.mouseup, false)
+            this.mousemove = this.mousemove.bind(this)
+            this.mouseup = this.mouseup.bind(this)
+            document.addEventListener('mousemove', this.mousemove, false)
+            document.addEventListener('mouseup', this.mouseup, false)
         }
     }
     // 鼠标/手指移动
     Swipe.prototype.mousemove = function (e) {
         e.preventDefault()
         var targrtClsName = e.target.className
-        if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
+        if (targrtClsName.indexOf('swipe-btn-next') >= 0 || targrtClsName.indexOf('swipe-btn-prev') >= 0 ) return
         clearTimeout(autoTimer)
-        if (autoTimer) {
-            this.autoSlide()
-        }
+        // 滑动实时更新的位置
         var offsetX = e.offsetX ? e.offsetX : e.touches[0].pageX;
-        scroll = (offsetX - start + end)
+        scroll = (offsetX) - start + end
         turnLR = offsetX - start
-        this.setStyle(Math.ceil(scroll), true)
+        this.throttle(this.setStyle(Math.ceil(scroll), false),100)
     }
     // 鼠标/手指抬起
     Swipe.prototype.mouseup = function (e) {
         e.preventDefault()
         var targrtClsName = e.target.className
-        if (targrtClsName === 'swipe-btn-next' || targrtClsName === 'swipe-btn-prev') return
+        if (targrtClsName.indexOf('swipe-btn-next') >= 0 || targrtClsName.indexOf('swipe-btn-prev') >= 0 ) return
         clearTimeout(autoTimer)
         if (autoTimer) {
             this.autoSlide()
@@ -357,7 +351,7 @@
                 clearTimeout(timer)
                 timer = null
                 fn.apply(that, args)
-            }, interval || speed);
+            }, interval || speed + 50);
         }
     }
     // 自动轮播
