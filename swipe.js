@@ -1,9 +1,9 @@
 /**
- * Swiper 0.1.0
+ * Swiper 0.1.1
  * https://github.com/wclimb/Swipe
  * Copyright 2018 wclimb
  * Released under the MIT License
- * 2018-06-26
+ * 2018-06-27
  */
 (function (window) {
     'use strict';
@@ -199,7 +199,7 @@
         clearTimeout(autoTimer)
         e.preventDefault()
         // 按下的开始位置
-        start = e.offsetX ? e.offsetX : e.touches[0].pageX;
+        start = e.touches ? e.touches[0].pageX : e.pageX
         if (index === 0) {
             index = totalLength - 2;
             end = -clientWidth * index
@@ -224,7 +224,7 @@
         if (targrtClsName.indexOf('swipe-btn-next') >= 0 || targrtClsName.indexOf('swipe-btn-prev') >= 0 ) return
         clearTimeout(autoTimer)
         // 滑动实时更新的位置
-        var offsetX = e.offsetX ? e.offsetX : e.touches[0].pageX;
+        var offsetX = e.touches ? e.touches[0].pageX : e.pageX ;
         scroll = (offsetX) - start + end
         turnLR = offsetX - start
         this.throttle(this.setStyle(Math.ceil(scroll), false),100)
@@ -238,7 +238,7 @@
         if (autoTimer) {
             this.autoSlide()
         }
-        var offsetX = e.offsetX ? e.offsetX : e.changedTouches[0].pageX;
+        var offsetX = e.changedTouches ? e.changedTouches[0].pageX : e.pageX;
         if (start === offsetX) {
             // 移除滑动和抬起时间
             document.removeEventListener('mousemove', this.mousemove, false)

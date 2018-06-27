@@ -36,9 +36,34 @@
                 width: 100%;
             }
         }
+        .realIndex{
+            text-align: center;
+            margin-top: 20px;
+        }
+        pre{
+            width: 50%;
+            margin: 20px auto;
+            background: #ccc;
+            border-radius: 10px;
+        }
+        .github {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        .github iframe{
+            display: inline-block;
+            
+        }
     </style>
 </head>
 <body>
+    <div class="github">
+        GitHub：
+        <iframe src="https://ghbtns.com/github-btn.html?user=wclimb&repo=Swipe&type=watch&count=true" frameborder="0" scrolling="0"
+    width="170px" height="20px"></iframe>
+    </div> 
     <div class="main">
         <div class="swipe-wrap">
             <div class="swipe-slide slide1">
@@ -58,6 +83,30 @@
         <div class="swipe-btn-prev"></div>
         <div class="swipe-btn-next"></div>
     </div>
+
+    <div class="realIndex">运动结束, realIndex = 0</div>
+    <pre>
+        <code>
+            var swiper = new Swipe('.main',{
+                startSlide: 1,
+                speed: 300,
+                pagination:{
+                    el: '.pagination',
+                    clickAble: true
+                },
+                autoplay: 2000,
+                navigation:{
+                    next:'.swipe-btn-next',
+                    prev:'.swipe-btn-prev',
+                },
+                transitionEnd:function(swipe){
+                    console.log('realIndex',swipe.realIndex)
+                    document.querySelector('.realIndex').innerHTML = 
+                    '运动结束, realIndex = ' + swipe.realIndex
+                },
+            })
+        </code>
+    </pre>
     <script src="../swipe.js"></script>
     <script>
         var swiper = new Swipe('.main',{
@@ -74,6 +123,7 @@
             },
             transitionEnd:function(swipe){
                 console.log('realIndex',swipe.realIndex)
+                document.querySelector('.realIndex').innerHTML = '运动结束, realIndex = ' + swipe.realIndex
             },
         })
     </script>
