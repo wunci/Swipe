@@ -92,7 +92,7 @@
             main.addEventListener('mousedown', that.mousedown.bind(that), false)
         }
         document.addEventListener('visibilitychange', function () {
-            if (document.visibilityState == 'visible') {
+            if (document.visibilityState === 'visible' && autoplay) {
                 clearTimeout(autoTimer)
                 that.autoSlide()
             }else{
