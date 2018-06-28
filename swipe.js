@@ -68,22 +68,10 @@
                 paginationEl.appendChild(ele)
             }
         }
-        window.onresize = window.onload = this.throttle(function () {
-            clientWidth = wrap.offsetWidth
-            end = -clientWidth
-            index = startSlide = options.startSlide || 1; // 初始化开始位置
-            start = end = startSlide * -clientWidth;
-            scroll = 0;
-            var nowAllImg = wrap.querySelectorAll('.swipe-slide');
-            nowAllImg.forEach(function(val,i){
-                val.setAttribute('data-index',i);
-                val.style.width = clientWidth + 'px'
-            })
-            that.setStyle(end, false)
-        })
-
-        this.setStyle(end, false)
-
+        var initFn = this.init.bind(this, options)
+        window.addEventListener('DOMContentLoaded', this.throttle(initFn,100), false)
+        window.addEventListener('resize', this.throttle(initFn,100), false)
+        
         if ('ontouchstart' in window) {
             main.addEventListener('touchstart', this.mousedown.bind(this), false)
             main.addEventListener('touchmove', this.mousemove.bind(this), false)
@@ -115,7 +103,21 @@
             }
         }
     }
-
+    Swipe.prototype.init = function (options) {
+        console.log(11)
+        clientWidth = wrap.offsetWidth
+        end = -clientWidth
+        index = startSlide = options.startSlide || 1; // 初始化开始位置
+        start = end = startSlide * -clientWidth;
+        scroll = 0;
+        var nowAllImg = wrap.querySelectorAll('.swipe-slide');
+        nowAllImg.forEach(function (val, i) {
+            val.setAttribute('data-index', i);
+            val.style.width = clientWidth + 'px'
+        })
+        this.setStyle(end, false)
+        this.setPagination()
+    }
     // 分页按钮点击
     Swipe.prototype.paginationClick = function (i, e) {
         if (i + 1 === index) return
