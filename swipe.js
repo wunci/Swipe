@@ -1,9 +1,9 @@
 /**
- * Swiper 0.1.1
+ * Swiper 0.1.2
  * https://github.com/wclimb/Swipe
  * Copyright 2018 wclimb
  * Released under the MIT License
- * 2018-06-27
+ * 2018-06-28
  */
 (function (window) {
     'use strict';
@@ -71,7 +71,7 @@
         var initFn = this.init.bind(this, options)
         window.addEventListener('DOMContentLoaded', this.throttle(initFn,100), false)
         window.addEventListener('resize', this.throttle(initFn,100), false)
-        
+
         if ('ontouchstart' in window) {
             main.addEventListener('touchstart', this.mousedown.bind(this), false)
             main.addEventListener('touchmove', this.mousemove.bind(this), false)
